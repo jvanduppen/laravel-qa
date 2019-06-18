@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Question;
 use Illuminate\Http\Request;
+use App\Http\Requests\AskQuestionRequest;
 
 class QuestionsController extends Controller
 {
@@ -13,13 +14,10 @@ class QuestionsController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-       // \DB::enableQueryLog();
+    {        
         $questions = Question::with('user')->latest()->paginate(10);
 
-         return view('questions.index', compact('questions'));//->render();
-
-       //  dd(\DB::getQueryLog());
+        return view('questions.index', compact('questions'));        
     }
 
     /**
@@ -40,9 +38,11 @@ class QuestionsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(AskQuestionRequest $request)
     {
-        //
+        $request->user()->questions()->create($request->only('title', 'body'));
+
+        return redirect()->route('questions.index')->with('success', "Your question has been submitted");
     }
 
     /**
@@ -64,7 +64,7 @@ class QuestionsController extends Controller
      */
     public function edit(Question $question)
     {
-        //
+        return view("questions.edit",compact('question'));
     }
 
     /**
@@ -74,9 +74,11 @@ class QuestionsController extends Controller
      * @param  \App\Question  $question
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Question $question)
+    public function update(AskQuestionRequest $request, Question $question)
     {
-        //
+        $question->update($request->only('title', 'body'));
+
+        return redirect('/questions')->with('success', "Your question has been updated.");
     }
 
     /**
